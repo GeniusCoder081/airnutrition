@@ -264,156 +264,293 @@ document.addEventListener("DOMContentLoaded", function () {
   showProducts();
 });
 
-
 function slideProducts(sliderId, direction) {
-    const slider =
-        document.getElementById(sliderId);
-    if (!slider) return;
-    const card =
-        slider.querySelector(".product-card");
-    if (!card) return;
-    const cardWidth =
-        card.offsetWidth;
-    const gap =
-        parseInt(
-            window.getComputedStyle(slider).gap
-        ) || 0;
-    const scrollAmount =
-        cardWidth + gap;
-    slider.scrollBy({
-        left:
-            direction *
-            scrollAmount,
-        behavior: "smooth"
-    });
+  const slider = document.getElementById(sliderId);
+  if (!slider) return;
+  const card = slider.querySelector(".product-card");
+  if (!card) return;
+  const cardWidth = card.offsetWidth;
+  const gap = parseInt(window.getComputedStyle(slider).gap) || 0;
+  const scrollAmount = cardWidth + gap;
+  slider.scrollBy({
+    left: direction * scrollAmount,
+    behavior: "smooth",
+  });
 }
 /* ==========================================
    TOUCH / MOUSE DRAG SUPPORT
 ========================================== */
-document.querySelectorAll(
-    ".product-slider"
-).forEach(function (slider) {
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-    slider.addEventListener(
-        "mousedown",
-        function (e) {
-            isDown = true;
-            slider.classList.add(
-                "is-dragging"
-            );
-            startX = e.pageX -
-                slider.offsetLeft;
-            scrollLeft =
-                slider.scrollLeft;
-        }
-    );
-    slider.addEventListener(
-        "mouseleave",
-        function () {
-            isDown = false;
-            slider.classList.remove(
-                "is-dragging"
-            );
-        }
-    );
-    slider.addEventListener(
-        "mouseup",
-        function () {
-            isDown = false;
-            slider.classList.remove(
-                "is-dragging"
-            );
-        }
-    );
-    slider.addEventListener(
-        "mousemove",
-        function (e) {
-            if (!isDown) return;
-            e.preventDefault();
-            const x =
-                e.pageX -
-                slider.offsetLeft;
-            const walk =
-                (x - startX) * 1.5;
-            slider.scrollLeft =
-                scrollLeft - walk;
-        }
-    );
+document.querySelectorAll(".product-slider").forEach(function (slider) {
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+  slider.addEventListener("mousedown", function (e) {
+    isDown = true;
+    slider.classList.add("is-dragging");
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+  slider.addEventListener("mouseleave", function () {
+    isDown = false;
+    slider.classList.remove("is-dragging");
+  });
+  slider.addEventListener("mouseup", function () {
+    isDown = false;
+    slider.classList.remove("is-dragging");
+  });
+  slider.addEventListener("mousemove", function (e) {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    slider.scrollLeft = scrollLeft - walk;
+  });
 });
 
-
-
 function moveShowcase(sliderId, direction) {
-    const slider =
-        document.getElementById(sliderId);
-    if (!slider) return;
-    const card =
-        slider.querySelector(
-            ".showcase-product-card"
-        );
-    if (!card) return;
-    const gap =
-        parseInt(
-            window.getComputedStyle(slider).gap
-        ) || 0;
-    const scrollAmount =
-        card.offsetWidth + gap;
-    slider.scrollBy({
-        left:
-            scrollAmount *
-            direction,
-        behavior: "smooth"
-    });
+  const slider = document.getElementById(sliderId);
+  if (!slider) return;
+  const card = slider.querySelector(".showcase-product-card");
+  if (!card) return;
+  const gap = parseInt(window.getComputedStyle(slider).gap) || 0;
+  const scrollAmount = card.offsetWidth + gap;
+  slider.scrollBy({
+    left: scrollAmount * direction,
+    behavior: "smooth",
+  });
 }
 /* ==========================================
    DRAG TO SLIDE
 ========================================== */
-document.querySelectorAll(
-    ".showcase-products"
-).forEach(function (slider) {
-    let isDown = false;
-    let startX = 0;
-    let startScroll = 0;
-    slider.addEventListener(
-        "mousedown",
-        function (e) {
-            isDown = true;
-            startX =
-                e.pageX -
-                slider.offsetLeft;
-            startScroll =
-                slider.scrollLeft;
-            slider.style.cursor =
-                "grabbing";
-        }
-    );
-    slider.addEventListener(
-        "mousemove",
-        function (e) {
-            if (!isDown) return;
-            e.preventDefault();
-            const x =
-                e.pageX -
-                slider.offsetLeft;
-            const distance =
-                (x - startX) * 1.3;
-            slider.scrollLeft =
-                startScroll -
-                distance;
-        }
-    );
-    ["mouseup", "mouseleave"].forEach(
-        function (event) {
-            slider.addEventListener(
-                event,
-                function () {
-                    isDown = false;
-                    slider.style.cursor =
-                        "grab";
-                }
-            );
-        }
-    );
+document.querySelectorAll(".showcase-products").forEach(function (slider) {
+  let isDown = false;
+  let startX = 0;
+  let startScroll = 0;
+  slider.addEventListener("mousedown", function (e) {
+    isDown = true;
+    startX = e.pageX - slider.offsetLeft;
+    startScroll = slider.scrollLeft;
+    slider.style.cursor = "grabbing";
+  });
+  slider.addEventListener("mousemove", function (e) {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const distance = (x - startX) * 1.3;
+    slider.scrollLeft = startScroll - distance;
+  });
+  ["mouseup", "mouseleave"].forEach(function (event) {
+    slider.addEventListener(event, function () {
+      isDown = false;
+      slider.style.cursor = "grab";
+    });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const productItems = Array.from(
+    document.querySelectorAll(".product-grid .product-item"),
+  );
+
+  const filterButtons = document.querySelectorAll(".product-filter");
+
+  const pagination = document.querySelector(".product-pagination");
+
+  const productsPerPage = 8;
+
+  let activeCategory = "all";
+
+  let currentPage = 1;
+
+  function getFilteredProducts() {
+    if (activeCategory === "all") {
+      return productItems;
+    }
+
+    return productItems.filter(function (item) {
+      return item.dataset.category === activeCategory;
+    });
+  }
+
+  function updateActiveFilter() {
+    filterButtons.forEach(function (button) {
+      button.classList.toggle(
+        "active",
+        button.dataset.category === activeCategory,
+      );
+    });
+  }
+
+  function showProducts() {
+    const filteredProducts = getFilteredProducts();
+
+    productItems.forEach(function (item) {
+      item.style.display = "none";
+
+      item.classList.remove("product-show");
+    });
+
+    const start = (currentPage - 1) * productsPerPage;
+
+    const end = start + productsPerPage;
+
+    filteredProducts.slice(start, end).forEach(function (item) {
+      item.style.display = "";
+
+      void item.offsetWidth;
+
+      item.classList.add("product-show");
+    });
+
+    createPagination(filteredProducts.length);
+  }
+
+  function createPagination(totalProducts) {
+    if (!pagination) {
+      return;
+    }
+
+    pagination.innerHTML = "";
+
+    const totalPages = Math.ceil(totalProducts / productsPerPage);
+
+    if (totalPages <= 1) {
+      return;
+    }
+
+    if (currentPage > 1) {
+      const prev = document.createElement("button");
+
+      prev.className = "pagination-btn";
+
+      prev.innerHTML = '<i class="fa fa-angle-left"></i>';
+
+      prev.addEventListener("click", function () {
+        currentPage--;
+
+        showProducts();
+
+        scrollToProducts();
+      });
+
+      pagination.appendChild(prev);
+    }
+
+    for (let page = 1; page <= totalPages; page++) {
+      const button = document.createElement("button");
+
+      button.className = "pagination-btn";
+
+      button.textContent = page;
+
+      if (page === currentPage) {
+        button.classList.add("active");
+      }
+
+      button.addEventListener("click", function () {
+        currentPage = page;
+
+        showProducts();
+
+        scrollToProducts();
+      });
+
+      pagination.appendChild(button);
+    }
+
+    if (currentPage < totalPages) {
+      const next = document.createElement("button");
+
+      next.className = "pagination-btn";
+
+      next.innerHTML = '<i class="fa fa-angle-right"></i>';
+
+      next.addEventListener("click", function () {
+        currentPage++;
+
+        showProducts();
+
+        scrollToProducts();
+      });
+
+      pagination.appendChild(next);
+    }
+  }
+
+  filterButtons.forEach(function (button) {
+    button.addEventListener("click", function (event) {
+      event.preventDefault();
+
+      activeCategory = this.dataset.category;
+
+      currentPage = 1;
+
+      updateActiveFilter();
+
+      showProducts();
+
+      updateURL(activeCategory);
+    });
+  });
+
+  function updateURL(category) {
+    const url = new URL(window.location.href);
+
+    if (category === "all") {
+      url.searchParams.delete("category");
+    } else {
+      url.searchParams.set("category", category);
+    }
+
+    window.history.replaceState({}, "", url);
+  }
+
+  function scrollToProducts() {
+    const section = document.getElementById("all-products");
+
+    if (!section) {
+      return;
+    }
+
+    section.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+
+  function loadCategoryFromURL() {
+    const params = new URLSearchParams(window.location.search);
+
+    const category = params.get("category");
+
+    if (!category) {
+      activeCategory = "all";
+
+      currentPage = 1;
+
+      updateActiveFilter();
+
+      showProducts();
+
+      return;
+    }
+
+    const categoryExists = productItems.some(function (item) {
+      return item.dataset.category === category;
+    });
+
+    if (categoryExists) {
+      activeCategory = category;
+    } else {
+      activeCategory = "all";
+    }
+
+    currentPage = 1;
+
+    updateActiveFilter();
+
+    showProducts();
+  }
+
+  loadCategoryFromURL();
 });
