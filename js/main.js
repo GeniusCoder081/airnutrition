@@ -372,3 +372,20 @@ document.addEventListener("DOMContentLoaded", function () {
   // ==========================================
   loadCategoryFromURL();
 });
+
+function openWhatsAppFromCard(element) {
+  productCard = element.closest(".showcase-product-card");
+  if (!productCard) {
+    return;
+  }
+  productName = productCard.getAttribute("data-product") || "Product";
+  const productPrice =
+    productCard.getAttribute("data-price") || "Price not available";
+  const productCategory =
+    productCard.getAttribute("data-category") || "Fitness Supplement";
+  const message = `Hello Air Nutrition, I am interested in purchasing this product. Product: ${productName} Category: ${productCategory} Price: ${productPrice} Please share more details and availability. Thank you.`;
+  const phoneNumber = "917417513652";
+  const whatsappURL =
+    "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(message);
+  window.open(whatsappURL, "_blank");
+}
